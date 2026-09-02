@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export BUILDKITE_GIT_MIRRORS_PATH=""
+export BUILDKITE_GIT_CLONE_FLAGS="-v --depth=1"
+export BUILDKITE_GIT_FETCH_FLAGS="-v --prune --depth=1"

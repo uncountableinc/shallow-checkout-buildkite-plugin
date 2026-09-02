@@ -1,0 +1,7 @@
+name: Shallow Checkout
+description: Shallow, mirror-free git checkout for Buildkite hosted agents
+author: https://github.com/uncountableinc
+requirements: []
+configuration:
+  properties: {}
+  additionalProperties: false
