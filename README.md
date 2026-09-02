@@ -3,18 +3,6 @@
 Replaces the Buildkite agent's checkout with a single shallow fetch of the commit being built:
 no git mirror, no history.
 
-## Why
-
-Hosted agents keep a full mirror of the repository on each machine. A machine that has never built
-the repository first clones the whole mirror, which takes 3 to 13 minutes for `uncountableinc/main`.
-Neither pipeline YAML (`checkout:` is ignored on hosted agents) nor hooks can turn the mirror off:
-`BUILDKITE_GIT_MIRRORS_PATH` "cannot be modified from within a job, hook, or plugin". A plugin
-`checkout` hook, however, overrides the default checkout routine entirely, so the agent never
-touches the mirror.
-
-With the plugin, a checkout on a fresh machine is one `git fetch --depth=1` of the commit plus a
-checkout of the tree, about 20 seconds.
-
 ## Usage
 
 Pin the plugin to a commit:
