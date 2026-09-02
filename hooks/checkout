@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mkdir -p "$BUILDKITE_BUILD_CHECKOUT_PATH"
+cd "$BUILDKITE_BUILD_CHECKOUT_PATH"
+
+if [ ! -d .git ]; then
+  git init --quiet
+  git remote add origin "$BUILDKITE_REPO"
+fi
+
+if [ "$BUILDKITE_COMMIT" = "HEAD" ]; then
+  git fetch --quiet --depth=1 origin "$BUILDKITE_BRANCH"
+else
+  git fetch --quiet --depth=1 origin "$BUILDKITE_COMMIT"
+fi
+git checkout --quiet -f FETCH_HEAD
+git clean -ffxdq
