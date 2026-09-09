@@ -33,7 +33,10 @@ steps:
 2. `git fetch --depth=1 origin <commit>`, or the branch when the build was started without a commit.
 3. `git checkout -f FETCH_HEAD`, then `git clean -ffxdq`.
 
-Credentials come from the agent's git credential helper, the same one the default checkout uses.
+Credentials come from the agent, the same way the default checkout gets them: the git credential
+helper on hosted agents, or `checkout.ssh_secret` on self-hosted agents. For an SSH `github.com`
+repository the hook first adds GitHub's published host keys (from `https://api.github.com/meta`) to
+`~/.ssh/known_hosts`, because the default checkout does that and a plugin checkout hook replaces it.
 
 ## Do not use it for jobs that need history
 
