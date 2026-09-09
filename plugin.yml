@@ -1,7 +1,10 @@
 name: Shallow Checkout
-description: Shallow, mirror-free git checkout for Buildkite hosted agents
+description: Shallow, mirror-free git checkout for Buildkite agents
 author: https://github.com/uncountableinc
 requirements: []
 configuration:
-  properties: {}
+  properties:
+    ssh_secret:
+      type: string
+      description: Buildkite secret holding the SSH private key used to fetch the repository
   additionalProperties: false
