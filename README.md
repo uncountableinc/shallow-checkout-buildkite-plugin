@@ -31,10 +31,14 @@ checkout routine, so pass the secret to the plugin instead:
           ssh_secret: NAME_OF_BUILDKITE_SECRET
 ```
 
-The hook reads the key with `buildkite-agent secret get`, points `GIT_SSH_COMMAND` at it for the
-fetch, and deletes the file when the hook exits. For an SSH `github.com` repository it also adds
-GitHub's published host keys (from `https://api.github.com/meta`) to `~/.ssh/known_hosts` first,
-because the default checkout does that and a plugin checkout hook replaces it.
+The `environment` hook reads the key with `buildkite-agent secret get` into a temporary file and
+exports `GIT_SSH_COMMAND` pointing at it, so the checkout and every later `git` call in the job
+(for example fetching a pull request merge ref) authenticate the same way. The `pre-exit` hook
+deletes the file. `GIT_SSH_COMMAND` runs `ssh` with `LD_LIBRARY_PATH` unset, so a Nix or devenv
+shell that prepends its own libraries cannot break the host's `ssh`. For an SSH `github.com`
+repository the checkout hook also adds GitHub's published host keys (from
+`https://api.github.com/meta`) to `~/.ssh/known_hosts` first, because the default checkout does
+that and a plugin checkout hook replaces it.
 
 ## Do not use it for jobs that need history
 

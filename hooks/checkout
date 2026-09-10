@@ -3,14 +3,6 @@ set -euo pipefail
 
 GITHUB_HOST_KEYS_URL="https://api.github.com/meta"
 
-ssh_key_file=""
-remove_ssh_key_file() {
-  if [ -n "$ssh_key_file" ]; then
-    rm -f "$ssh_key_file"
-  fi
-}
-trap remove_ssh_key_file EXIT
-
 trust_github_host_keys() {
   local known_hosts="$HOME/.ssh/known_hosts"
   mkdir -p "$HOME/.ssh"
@@ -22,24 +14,9 @@ trust_github_host_keys() {
   curl -fsSL "$GITHUB_HOST_KEYS_URL" | jq -r '.ssh_keys[] | "github.com \(.)"' >> "$known_hosts"
 }
 
-use_ssh_secret() {
-  local secret_name="$1"
-  ssh_key_file=$(mktemp)
-  chmod 600 "$ssh_key_file"
-  {
-    buildkite-agent secret get "$secret_name"
-    echo
-  } > "$ssh_key_file"
-  export GIT_SSH_COMMAND="ssh -i $ssh_key_file -o IdentitiesOnly=yes"
-}
-
 case "$BUILDKITE_REPO" in
   git@github.com:* | ssh://git@github.com/*) trust_github_host_keys ;;
 esac
-
-if [ -n "${BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_SECRET:-}" ]; then
-  use_ssh_secret "$BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_SECRET"
-fi
 
 mkdir -p "$BUILDKITE_BUILD_CHECKOUT_PATH"
 cd "$BUILDKITE_BUILD_CHECKOUT_PATH"

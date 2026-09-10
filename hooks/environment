@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -z "${BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_SECRET:-}" ]; then
+  return 0
+fi
+
+ssh_key_file=$(mktemp)
+chmod 600 "$ssh_key_file"
+{
+  buildkite-agent secret get "$BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_SECRET"
+  echo
+} > "$ssh_key_file"
+
+export BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_KEY_FILE="$ssh_key_file"
+export GIT_SSH_COMMAND="env -u LD_LIBRARY_PATH ssh -i $ssh_key_file -o IdentitiesOnly=yes"

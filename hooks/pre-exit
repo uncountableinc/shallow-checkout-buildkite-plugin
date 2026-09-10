@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ -n "${BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_KEY_FILE:-}" ]; then
+  rm -f "$BUILDKITE_PLUGIN_SHALLOW_CHECKOUT_SSH_KEY_FILE"
+fi
