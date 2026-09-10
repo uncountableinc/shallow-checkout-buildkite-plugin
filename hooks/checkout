@@ -32,4 +32,4 @@ else
   git fetch --quiet --depth=1 origin "$BUILDKITE_COMMIT"
 fi
 git checkout --quiet -f FETCH_HEAD
-git clean -ffxdq
+git clean -ffxdq -e .devenv

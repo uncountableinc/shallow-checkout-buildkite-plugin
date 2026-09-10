@@ -19,7 +19,8 @@ steps:
 
 1. `git init` in `BUILDKITE_BUILD_CHECKOUT_PATH` and add `BUILDKITE_REPO` as `origin`.
 2. `git fetch --depth=1 origin <commit>`, or the branch when the build was started without a commit.
-3. `git checkout -f FETCH_HEAD`, then `git clean -ffxdq`.
+3. `git checkout -f FETCH_HEAD`, then `git clean -ffxdq -e .devenv`. The `.devenv` directory is
+   kept so devenv's evaluation cache survives between jobs on the same agent.
 
 On hosted agents credentials come from the agent's git credential helper, the same one the default
 checkout uses. On self-hosted agents the agent applies `checkout.ssh_secret` only to its own
