@@ -2,6 +2,19 @@
 set -euo pipefail
 
 GITHUB_HOST_KEYS_URL="https://api.github.com/meta"
+GITHUB_RETRY_DELAYS_SECONDS=(5 15)
+
+with_github_retries() {
+  local delay_seconds
+  for delay_seconds in "${GITHUB_RETRY_DELAYS_SECONDS[@]}"; do
+    if "$@"; then
+      return 0
+    fi
+    echo "$1 failed, retrying in ${delay_seconds}s" >&2
+    sleep "$delay_seconds"
+  done
+  "$@"
+}
 
 trust_github_host_keys() {
   local known_hosts="$HOME/.ssh/known_hosts"
@@ -11,7 +24,9 @@ trust_github_host_keys() {
   if ssh-keygen -F github.com -f "$known_hosts" > /dev/null; then
     return
   fi
-  curl -fsSL "$GITHUB_HOST_KEYS_URL" | jq -r '.ssh_keys[] | "github.com \(.)"' >> "$known_hosts"
+  local github_meta
+  github_meta=$(with_github_retries curl -fsSL "$GITHUB_HOST_KEYS_URL")
+  jq -r '.ssh_keys[] | "github.com \(.)"' <<< "$github_meta" >> "$known_hosts"
 }
 
 case "$BUILDKITE_REPO" in
@@ -27,9 +42,9 @@ if [ ! -d .git ]; then
 fi
 
 if [ "$BUILDKITE_COMMIT" = "HEAD" ]; then
-  git fetch --quiet --depth=1 origin "$BUILDKITE_BRANCH"
+  with_github_retries git fetch --quiet --depth=1 origin "$BUILDKITE_BRANCH"
 else
-  git fetch --quiet --depth=1 origin "$BUILDKITE_COMMIT"
+  with_github_retries git fetch --quiet --depth=1 origin "$BUILDKITE_COMMIT"
 fi
 git checkout --quiet -f FETCH_HEAD
 git clean -ffxdq -e .devenv
